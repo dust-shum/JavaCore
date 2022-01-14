@@ -1,18 +1,20 @@
-package com.dust.demo;
+package com.dust.demo.simple;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
 
 /**
  * @author DUST
- * @description 自定义netty服务器处理器demo
+ * @description 自定义netty客户端处理器demo
  * @date 2022/1/13
  */
-public class NettyServerHandle implements ChannelInboundHandler {
+public class NettyClientHandle implements ChannelInboundHandler {
+
     @Override
     public void channelRegistered(ChannelHandlerContext channelHandlerContext) throws Exception {
 
@@ -29,10 +31,23 @@ public class NettyServerHandle implements ChannelInboundHandler {
      * @date 2022/1/13
      * @param channelHandlerContext 通道上下文对象
      * @return void
-    */
+     */
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
-
+        //将数据写到ChannelPipeline中当前ChannelHandler的下一个ChannelHandler开始处理（出站）
+        ChannelFuture channelFuture =
+                channelHandlerContext.writeAndFlush("你好，我是netty客户端");
+        channelFuture.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                if(channelFuture.isSuccess()){
+                    System.out.println("数据发送成功！");
+                }else{
+                    System.out.println("数据发送失败！");
+                    channelFuture.cause().printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
@@ -47,11 +62,10 @@ public class NettyServerHandle implements ChannelInboundHandler {
      * @param channelHandlerContext 通道上下文对象
      * @param o
      * @return void
-    */
+     */
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object o) throws Exception {
-        ByteBuf byteBuf = (ByteBuf) o;
-        System.out.println("客户端发来消息:" + byteBuf.toString(CharsetUtil.UTF_8));
+        System.out.println("服务器发来消息:" + o);
     }
 
     /**
@@ -60,11 +74,10 @@ public class NettyServerHandle implements ChannelInboundHandler {
      * @date 2022/1/13
      * @param channelHandlerContext 通道上下文对象
      * @return void
-    */
+     */
     @Override
     public void channelReadComplete(ChannelHandlerContext channelHandlerContext) throws Exception {
-        //将数据写到ChannelPipeline中当前ChannelHandler的下一个ChannelHandler开始处理（出站）
-        channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer("你好，我是netty服务器", CharsetUtil.UTF_8));
+
     }
 
     @Override
@@ -94,7 +107,7 @@ public class NettyServerHandle implements ChannelInboundHandler {
      * @param channelHandlerContext 通道上下文对象
      * @param throwable
      * @return void
-    */
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) throws Exception {
 

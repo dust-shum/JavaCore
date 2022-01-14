@@ -1,4 +1,4 @@
-package com.dust.demo;
+package com.dust.demo.simple;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -34,13 +34,15 @@ public class NettyClient {
         Bootstrap bootstrap = new Bootstrap();
         // 3. 设置线程组
         bootstrap.group(group)
-                // 4. 设置服务端通道实现为NIO
+                // 4. 设置客户端通道实现为NIO
                 .channel(NioSocketChannel.class)
                 // 5. 创建一个通道初始化对象
                 .handler(new ChannelInitializer<SocketChannel>() {
                      @Override
                      protected void initChannel(SocketChannel ch) throws Exception {
                          // 6. 向pipeline中添加自定义业务处理handler
+                         ch.pipeline().addLast(new MessageDecoder());//添加解码器
+                         ch.pipeline().addLast(new MessageEncoder());//添加编码器
                          ch.pipeline().addLast(new NettyClientHandle());
                      }
                 });

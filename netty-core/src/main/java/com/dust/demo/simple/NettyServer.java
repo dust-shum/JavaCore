@@ -1,4 +1,4 @@
-package com.dust.demo;
+package com.dust.demo.simple;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -50,6 +50,7 @@ public class NettyServer {
                      @Override
                      protected void initChannel(SocketChannel ch) throws Exception {
                          //9.向pipeline中添加自定义业务处理handler
+                         ch.pipeline().addLast(new MessageCoder());//添加编解码器
                          ch.pipeline().addLast(new NettyServerHandle());
                      }
                 });
