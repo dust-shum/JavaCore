@@ -1,5 +1,6 @@
 package com.dust.demo;
 
+import com.dust.demo.easyRpc.server.RpcServer;
 import com.dust.demo.webChat.netty.NettyWebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +12,8 @@ public class NettyCoreApplication implements CommandLineRunner {
 
     @Autowired
     NettyWebSocketServer nettyWebSocketServer;
+    @Autowired
+    RpcServer rpcServer;
 
     public static void main(String[] args) {
         SpringApplication.run(NettyCoreApplication.class, args);
@@ -19,6 +22,11 @@ public class NettyCoreApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         new Thread(nettyWebSocketServer).start();
+        new Thread(new Runnable() {
+            @Override public void run() {
+                rpcServer.startServer("127.0.0.1", 8899);
+            }
+        }).start();
     }
 
 }
